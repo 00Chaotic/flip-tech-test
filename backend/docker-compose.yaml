@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  database:
+    image: postgres:17.3-alpine
+    environment:
+      POSTGRES_USER: flip
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - flip-db:/var/lib/postgresql/data
+
+volumes:
+  flip-db:
