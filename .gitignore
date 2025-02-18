@@ -41,3 +41,6 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/go,react
+
+# Other manually added entries
+**/.idea/
