@@ -2,7 +2,6 @@ package wiring
 
 import (
 	"context"
-	"github.com/rs/cors"
 	"log"
 	"net/http"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/00Chaotic/flip-tech-test/backend/internal/service"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 func StartServer(ctx context.Context, cfg *config.Config) {
@@ -25,6 +25,7 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/products", productService.GetProducts)
+	mux.HandleFunc("/purchase", productService.PurchaseProducts)
 
 	// Only needed if running frontend outside Docker
 	c := cors.New(cors.Options{
