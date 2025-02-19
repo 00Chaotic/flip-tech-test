@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -8,8 +9,8 @@ import (
 )
 
 // withTransaction handles the transaction lifecycle for database access objects.
-func withTransaction(dbx *sqlx.DB, fn func(*sqlx.Tx) error) error {
-	tx, err := dbx.Beginx()
+func withTransaction(ctx context.Context, dbx *sqlx.DB, fn func(*sqlx.Tx) error) error {
+	tx, err := dbx.BeginTxx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
