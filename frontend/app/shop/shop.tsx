@@ -57,6 +57,17 @@ export function Shop() {
     });
   };
 
+  const sendPurchaseRequest = () => {
+    axios.put(`${import.meta.env.VITE_HTTP_URL}/purchase`, {items: cart})
+      .then(response => {
+        console.log(response.data)
+        alert(`You paid $${response.data.total_price}!`)
+      })
+      .catch(error => {
+        setError(error);
+      });
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -123,7 +134,7 @@ export function Shop() {
             </tbody>
           </table>
           <p className="p-5">Total: ${total}</p>
-          <button className="px-2 py-1 bg-green-400 text-white rounded active:bg-green-600">Purchase</button>
+          <button onClick={sendPurchaseRequest} className="px-2 py-1 bg-green-400 text-white rounded active:bg-green-600">Purchase</button>
         </div>
       </div>
     </main>
