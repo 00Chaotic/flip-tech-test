@@ -2,6 +2,7 @@ package wiring
 
 import (
 	"context"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 
@@ -25,5 +26,14 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/products", productService.GetProducts)
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	// Only needed if running frontend outside Docker
+	c := cors.New(cors.Options{
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedOrigins: []string{"http://localhost:*"},
+	})
+
+	handler := c.Handler(mux)
+
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
