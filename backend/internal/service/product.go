@@ -34,14 +34,11 @@ func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := json.Marshal(products)
-	if err != nil {
-		log.Println("failed to marshal json", err)
+	res := model.ProductsResponse{Products: products}
+	if err = json.NewEncoder(w).Encode(res); err != nil {
+		log.Println("failed to encode response", err)
 		http.Error(w, "", http.StatusInternalServerError)
-		return
 	}
-
-	w.Write(res)
 }
 
 func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +73,6 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	}
 
 	res := model.PurchaseResponse{TotalPrice: totalPrice}
-
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		log.Println("failed to encode response", err)
 		http.Error(w, "", http.StatusInternalServerError)

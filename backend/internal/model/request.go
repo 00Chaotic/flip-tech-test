@@ -1,5 +1,9 @@
 package model
 
+type ProductsResponse struct {
+	Products []*Product `json:"products"`
+}
+
 type PurchaseItem struct {
 	SKU      string `json:"sku"`
 	Quantity int    `json:"quantity"`
