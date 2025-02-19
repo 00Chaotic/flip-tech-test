@@ -11,7 +11,7 @@ type ProductDAO struct {
 	dbx *sqlx.DB
 }
 
-func NewProductHandler(dbx *sqlx.DB) *ProductDAO {
+func NewProductDAO(dbx *sqlx.DB) *ProductDAO {
 	return &ProductDAO{dbx: dbx}
 }
 
