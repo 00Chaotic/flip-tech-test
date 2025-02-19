@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/00Chaotic/flip-tech-test/backend/internal/model"
 	"github.com/jmoiron/sqlx"
 )
@@ -22,7 +24,7 @@ func (d *ProductDAO) GetProducts(ctx context.Context) ([]*model.Product, error) 
 
 	query := `SELECT * FROM Product`
 
-	err := d.dbx.Select(&products, query)
+	err := d.dbx.SelectContext(ctx, &products, query)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +48,18 @@ func (d *ProductDAO) GetProductBySKU(ctx context.Context, sku string) (*model.Pr
 
 // UpdateProductInventory updates a Product inventory quantity by adding the difference parameter.
 // A negative difference will subtract from the Product inventory.
-func (d *ProductDAO) UpdateProductInventory(ctx context.Context, sku string, difference int) error {
-	return withTransaction(ctx, d.dbx, func(tx *sqlx.Tx) error {
-		query := `UPDATE Product SET Inventory = Inventory + $1 WHERE SKU = $2`
+func (d *ProductDAO) UpdateProductInventory(ctx context.Context, sku string, difference int) (*model.Product, error) {
+	var product model.Product
 
-		_, err := tx.ExecContext(ctx, query, difference, sku)
+	return &product, withTransaction(ctx, d.dbx, func(tx *sqlx.Tx) error {
+		query := `UPDATE Product SET Inventory = Inventory + $1 WHERE SKU = $2 RETURNING *`
+
+		err := tx.GetContext(ctx, &product, query, difference, sku)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil
+			}
+
 			return err
 		}
 

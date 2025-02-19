@@ -14,5 +14,6 @@ type PurchaseRequest struct {
 }
 
 type PurchaseResponse struct {
-	TotalPrice float64 `json:"total_price"`
+	TotalPrice      float64    `json:"total_price"`
+	UpdatedProducts []*Product `json:"updated_products"`
 }
