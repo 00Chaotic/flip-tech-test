@@ -8,6 +8,7 @@ import (
 	"github.com/00Chaotic/flip-tech-test/backend/internal/config"
 	"github.com/00Chaotic/flip-tech-test/backend/internal/postgres"
 	"github.com/00Chaotic/flip-tech-test/backend/internal/service"
+	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
@@ -23,9 +24,9 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 
 	productService := service.NewProductService(productDAO)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/products", productService.GetProducts)
-	mux.HandleFunc("/purchase", productService.PurchaseProducts)
+	router := mux.NewRouter()
+	router.HandleFunc("/products", productService.GetProducts)
+	router.HandleFunc("/purchase", productService.PurchaseProducts).Methods(http.MethodPut)
 
 	// Only needed if running frontend outside Docker
 	c := cors.New(cors.Options{
@@ -34,7 +35,7 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 		AllowedOrigins: []string{"http://localhost:*"},
 	})
 
-	handler := c.Handler(mux)
+	handler := c.Handler(router)
 
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }

@@ -9,4 +9,7 @@ require (
 
 require github.com/kelseyhightower/envconfig v1.4.0
 
-require github.com/rs/cors v1.11.1 // indirect
+require (
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/rs/cors v1.11.1 // indirect
+)
