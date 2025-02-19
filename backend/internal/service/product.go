@@ -62,6 +62,10 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 			return
 		}
 
+		if product.Inventory < item.Quantity {
+			http.Error(w, "not enough inventory", http.StatusConflict)
+		}
+
 		totalPrice += product.Price * float64(item.Quantity)
 
 		err = s.productRepository.UpdateProductInventory(ctx, item.SKU, -item.Quantity)
