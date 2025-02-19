@@ -1,5 +1,5 @@
 services:
-  app:
+  backend:
     build: ./backend
     depends_on:
       database:
@@ -31,12 +31,14 @@ services:
 
   frontend:
     build: ./frontend
+    depends_on:
+      - backend
     env_file:
       - ./frontend/.env
     networks:
       - flip-network
     ports:
-      - "3000:3000" # Adjust the port mapping as needed
+      - "3000:3000"
 
 networks:
   flip-network:
