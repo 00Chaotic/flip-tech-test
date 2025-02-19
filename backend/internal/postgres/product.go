@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/00Chaotic/flip-tech-test/backend/internal/model"
 	"github.com/jmoiron/sqlx"
 )
@@ -26,7 +24,7 @@ func (d *ProductDAO) GetProducts(ctx context.Context) ([]*model.Product, error) 
 
 	err := d.dbx.Select(&products, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get products: %w", err)
+		return nil, err
 	}
 
 	return products, nil
@@ -40,7 +38,7 @@ func (d *ProductDAO) GetProductBySKU(ctx context.Context, sku string) (*model.Pr
 
 	err := d.dbx.GetContext(ctx, &product, query, sku)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get product by sku: %w", err)
+		return nil, err
 	}
 
 	return &product, nil
@@ -54,7 +52,7 @@ func (d *ProductDAO) UpdateProductInventory(ctx context.Context, sku string, dif
 
 		_, err := tx.ExecContext(ctx, query, difference, sku)
 		if err != nil {
-			return fmt.Errorf("failed to update product inventory: %w", err)
+			return err
 		}
 
 		return nil
