@@ -46,10 +46,10 @@ export function Shop() {
           <tbody>
             {products.map((item, index) => (
               <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{item.sku}</td>
-              <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-              <td className="border border-gray-300 px-4 py-2">${item.price}</td>
-              <td className="border border-gray-300 px-4 py-2">{item.inventory}</td>
+              <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
+              <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
+              <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
+              <td className="border border-gray-300 px-4 py-2">{item.Inventory}</td>
             </tr>
             ))}
           </tbody>
