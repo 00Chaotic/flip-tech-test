@@ -11,7 +11,7 @@ export function Shop() {
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_HTTP_URL}/products`)
       .then(response => {
-        setCatalogue(response.data);
+        setCatalogue(response.data.products);
         setLoading(false);
       })
       .catch(error => {
@@ -21,36 +21,36 @@ export function Shop() {
   }, []);
 
   useEffect(() => {
-    const newTotal = cart.reduce((total, item) => total + item.Price * item.Quantity, 0);
+    const newTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
     setTotal(newTotal);
   }, [cart]);
 
   const addToCart = (item) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find(cartItem => cartItem.SKU === item.SKU);
+      const existingItem = prevCart.find(cartItem => cartItem.sku === item.sku);
 
       if (existingItem) {
         return prevCart.map(cartItem =>
-          cartItem.SKU === item.SKU
-            ? { ...cartItem, Quantity: cartItem.Quantity + 1 }
+          cartItem.sku === item.sku
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
       } else {
-        return [...prevCart, { ...item, Quantity: 1 }];
+        return [...prevCart, { ...item, quantity: 1 }];
       }
     });
   };
 
   const removeFromCart = (item) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find(cartItem => cartItem.SKU === item.SKU);
+      const existingItem = prevCart.find(cartItem => cartItem.sku === item.sku);
 
-      if (existingItem && existingItem.Quantity === 1) {
-        return prevCart.filter(cartItem => cartItem.SKU !== item.SKU);
+      if (existingItem && existingItem.quantity === 1) {
+        return prevCart.filter(cartItem => cartItem.sku !== item.sku);
       } else {
         return prevCart.map(cartItem =>
-          cartItem.SKU === item.SKU
-            ? { ...cartItem, Quantity: cartItem.Quantity - 1 }
+          cartItem.sku === item.sku
+            ? { ...cartItem, quantity: cartItem.quantity - 1 }
             : cartItem
         );
       }
@@ -87,10 +87,10 @@ export function Shop() {
             <tbody>
               {catalogue.map((item, index) => (
                 <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
-                <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.Inventory}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.sku}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                <td className="border border-gray-300 px-4 py-2">${item.price}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.inventory}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   <button className="px-2 py-1 bg-blue-500 text-white rounded active:bg-blue-700" onClick={() => addToCart(item)}>+</button>
                   <button className="px-2 py-1 bg-red-500 text-white rounded ml-2 active:bg-red-700" onClick={() => removeFromCart(item)}>-</button>
@@ -114,10 +114,10 @@ export function Shop() {
             <tbody>
               {cart.map((item, index) => (
                 <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
-                <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.Quantity}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.sku}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                <td className="border border-gray-300 px-4 py-2">${item.price}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.quantity}</td>
               </tr>
               ))}
             </tbody>
