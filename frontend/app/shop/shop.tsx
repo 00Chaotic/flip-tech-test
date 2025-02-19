@@ -60,7 +60,12 @@ export function Shop() {
   const sendPurchaseRequest = () => {
     axios.put(`${import.meta.env.VITE_HTTP_URL}/purchase`, {items: cart})
       .then(response => {
-        console.log(response.data)
+        setCatalogue((prevCatalogue) => {
+          return prevCatalogue.map((item) => {
+            const updatedItem = response.data.updated_products.find((updated) => updated.sku === item.sku);
+            return updatedItem ? updatedItem : item;
+          });
+        });
         alert(`You paid $${response.data.total_price}!`)
       })
       .catch(error => {
