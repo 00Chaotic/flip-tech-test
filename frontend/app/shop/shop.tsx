@@ -2,14 +2,16 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 export function Shop() {
-  const [products, setData] = useState([]);
+  const [catalogue, setCatalogue] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [total, setTotal] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_HTTP_URL}/products`)
       .then(response => {
-        setData(response.data);
+        setCatalogue(response.data);
         setLoading(false);
       })
       .catch(error => {
@@ -17,6 +19,43 @@ export function Shop() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    const newTotal = cart.reduce((total, item) => total + item.Price * item.Quantity, 0);
+    setTotal(newTotal);
+  }, [cart]);
+
+  const addToCart = (item) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find(cartItem => cartItem.SKU === item.SKU);
+
+      if (existingItem) {
+        return prevCart.map(cartItem =>
+          cartItem.SKU === item.SKU
+            ? { ...cartItem, Quantity: cartItem.Quantity + 1 }
+            : cartItem
+        );
+      } else {
+        return [...prevCart, { ...item, Quantity: 1 }];
+      }
+    });
+  };
+
+  const removeFromCart = (item) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find(cartItem => cartItem.SKU === item.SKU);
+
+      if (existingItem && existingItem.Quantity === 1) {
+        return prevCart.filter(cartItem => cartItem.SKU !== item.SKU);
+      } else {
+        return prevCart.map(cartItem =>
+          cartItem.SKU === item.SKU
+            ? { ...cartItem, Quantity: cartItem.Quantity - 1 }
+            : cartItem
+        );
+      }
+    });
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -33,27 +72,59 @@ export function Shop() {
           <h1 className="text-4xl">Flip Tech Test</h1>
         </div>
       </header>
-      <div className="flex-1 flex items-center justify-center p-10 min-h-0">
-        <table className="table-auto border-collapse border border-gray-200">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 px-4 py-2">SKU</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Price</th>
-              <th className="border border-gray-300 px-4 py-2">Inventory Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((item, index) => (
-              <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
-              <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
-              <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
-              <td className="border border-gray-300 px-4 py-2">{item.Inventory}</td>
-            </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex items-center justify-center p-10 min-h-0 space-x-50">
+        <div className="flex flex-col items-center justify-center min-h-0">
+          <h1 className="mb-5">Catalogue</h1>
+          <table className="table-auto border-collapse border border-gray-200">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">SKU</th>
+                <th className="border border-gray-300 px-4 py-2">Name</th>
+                <th className="border border-gray-300 px-4 py-2">Price</th>
+                <th className="border border-gray-300 px-4 py-2">Inventory Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {catalogue.map((item, index) => (
+                <tr key={index}>
+                <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
+                <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.Inventory}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <button className="px-2 py-1 bg-blue-500 text-white rounded active:bg-blue-700" onClick={() => addToCart(item)}>+</button>
+                  <button className="px-2 py-1 bg-red-500 text-white rounded ml-2 active:bg-red-700" onClick={() => removeFromCart(item)}>-</button>
+                </td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-0">
+          <h1 className="mb-5">Cart</h1>
+          <table className="table-auto border-collapse border border-gray-200">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 px-4 py-2">SKU</th>
+                <th className="border border-gray-300 px-4 py-2">Name</th>
+                <th className="border border-gray-300 px-4 py-2">Price</th>
+                <th className="border border-gray-300 px-4 py-2">Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.map((item, index) => (
+                <tr key={index}>
+                <td className="border border-gray-300 px-4 py-2">{item.SKU}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.Name}</td>
+                <td className="border border-gray-300 px-4 py-2">${item.Price}</td>
+                <td className="border border-gray-300 px-4 py-2">{item.Quantity}</td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="p-5">Total: ${total}</p>
+          <button className="px-2 py-1 bg-green-400 text-white rounded active:bg-green-600">Purchase</button>
+        </div>
       </div>
     </main>
   )
