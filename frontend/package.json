@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "dotenvx run -- react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.36.0",
     "@react-router/node": "^7.2.0",
     "@react-router/serve": "^7.2.0",
     "axios": "^1.7.9",

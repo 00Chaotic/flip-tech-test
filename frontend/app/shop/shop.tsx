@@ -7,7 +7,7 @@ export function Shop() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('http://backend-api-endpoint/products')
+    axios.get(`${import.meta.env.VITE_HTTP_URL}/products`)
       .then(response => {
         setData(response.data);
         setLoading(false);
