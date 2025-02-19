@@ -1,11 +1,13 @@
 services:
   app:
-    build: .
+    build: ./backend
     depends_on:
       database:
         condition: service_healthy
     env_file:
-      - .env
+      - ./backend/.env
+    networks:
+      - flip-network
     ports:
       - "8080:8080"
 
@@ -19,11 +21,25 @@ services:
       interval: 10s
       timeout: 10s
       retries: 3
+    networks:
+      - flip-network
     ports:
       - "5432:5432"
     volumes:
-      - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./backend/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - flip-db:/var/lib/postgresql/data
+
+  frontend:
+    build: ./frontend
+    env_file:
+      - ./frontend/.env
+    networks:
+      - flip-network
+    ports:
+      - "3000:3000" # Adjust the port mapping as needed
+
+networks:
+  flip-network:
 
 volumes:
   flip-db:
