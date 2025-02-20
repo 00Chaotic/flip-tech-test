@@ -56,7 +56,7 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
-			http.Error(w, fmt.Sprintf("item quantity is negative for SKU: %w", item.SKU), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("item quantity is negative for SKU: %s", item.SKU), http.StatusBadRequest)
 			return
 		}
 	}
