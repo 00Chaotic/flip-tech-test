@@ -2,7 +2,10 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,7 +15,7 @@ import (
 type ProductRepository interface {
 	GetProducts(ctx context.Context) ([]*model.Product, error)
 	GetProductBySKU(ctx context.Context, sku string) (*model.Product, error)
-	UpdateProductInventory(ctx context.Context, sku string, difference int) (*model.Product, error)
+	UpdateProductInventories(ctx context.Context, items []model.PurchaseItem) ([]*model.Product, error)
 }
 
 type ProductService struct {
@@ -53,7 +56,6 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	}
 
 	totalPrice := 0.0
-	updatedProducts := make([]*model.Product, 0, len(req.Items))
 
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
@@ -63,6 +65,11 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 
 		product, err := s.productRepository.GetProductBySKU(ctx, item.SKU)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				http.Error(w, fmt.Sprintf("no existing product with SKU: %s", item.SKU), http.StatusBadRequest)
+				return
+			}
+
 			log.Println("failed to get product by SKU", err)
 			http.Error(w, "", http.StatusInternalServerError)
 			return
@@ -74,20 +81,13 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 		}
 
 		totalPrice += product.Price * float64(item.Quantity)
+	}
 
-		product, err = s.productRepository.UpdateProductInventory(ctx, item.SKU, -item.Quantity)
-		if err != nil {
-			log.Println("failed to update product inventory", err)
-			http.Error(w, "", http.StatusInternalServerError)
-			return
-		}
-
-		if product == nil {
-			http.Error(w, "one or more products do not exist", http.StatusBadRequest)
-			return
-		}
-
-		updatedProducts = append(updatedProducts, product)
+	updatedProducts, err := s.productRepository.UpdateProductInventories(ctx, req.Items)
+	if err != nil {
+		log.Println("failed to update product inventories", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
 	}
 
 	res := model.PurchaseResponse{TotalPrice: totalPrice, UpdatedProducts: updatedProducts}
