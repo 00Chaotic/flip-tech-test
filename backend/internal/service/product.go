@@ -56,6 +56,11 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	updatedProducts := make([]*model.Product, 0, len(req.Items))
 
 	for _, item := range req.Items {
+		if item.Quantity < 0 {
+			http.Error(w, "item quantities cannot be negative", http.StatusBadRequest)
+			return
+		}
+
 		product, err := s.productRepository.GetProductBySKU(ctx, item.SKU)
 		if err != nil {
 			log.Println("failed to get product by SKU", err)
