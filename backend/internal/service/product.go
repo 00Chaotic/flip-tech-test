@@ -64,7 +64,7 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	totalPrice, updatedProducts, err := s.productRepository.UpdateProductInventories(ctx, req.Items)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "non-existent product or insufficient inventory", http.StatusBadRequest)
+			http.Error(w, "one or more items unavailable", http.StatusConflict)
 			return
 		}
 
