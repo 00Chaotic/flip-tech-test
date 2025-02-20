@@ -59,7 +59,7 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
-			http.Error(w, "item quantities cannot be negative", http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("item quantity is negative for SKU: %w", item.SKU), http.StatusBadRequest)
 			return
 		}
 
@@ -76,7 +76,7 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 		}
 
 		if product.Inventory < item.Quantity {
-			http.Error(w, "not enough inventory", http.StatusConflict)
+			http.Error(w, fmt.Sprintf("not enough inventory for SKU: %s", item.SKU), http.StatusConflict)
 			return
 		}
 
@@ -91,7 +91,7 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	}
 
 	res := model.PurchaseResponse{TotalPrice: totalPrice, UpdatedProducts: updatedProducts}
-	if err := json.NewEncoder(w).Encode(res); err != nil {
+	if err = json.NewEncoder(w).Encode(res); err != nil {
 		log.Println("failed to encode response", err)
 		http.Error(w, "", http.StatusInternalServerError)
 	}
