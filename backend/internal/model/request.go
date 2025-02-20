@@ -1,7 +1,8 @@
 package model
 
 type ProductsResponse struct {
-	Products []*Product `json:"products"`
+	Error    string     `json:"error,omitempty"`
+	Products []*Product `json:"products,omitempty"`
 }
 
 type PurchaseItem struct {
@@ -14,6 +15,7 @@ type PurchaseRequest struct {
 }
 
 type PurchaseResponse struct {
-	TotalPrice      float64    `json:"total_price"`
-	UpdatedProducts []*Product `json:"updated_products"`
+	Error           string     `json:"error,omitempty"`
+	TotalPrice      float64    `json:"total_price,omitempty"`
+	UpdatedProducts []*Product `json:"updated_products,omitempty"`
 }

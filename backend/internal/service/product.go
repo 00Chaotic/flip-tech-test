@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	http2 "github.com/00Chaotic/flip-tech-test/backend/internal/http"
 	"github.com/00Chaotic/flip-tech-test/backend/internal/model"
 )
 
@@ -29,18 +30,19 @@ func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	defer ctx.Done()
 
+	var res model.ProductsResponse
+
 	products, err := s.productRepository.GetProducts(ctx)
 	if err != nil {
 		log.Println("failed to get products", err)
-		http.Error(w, "failed to get products", http.StatusInternalServerError)
+
+		res.Error = "failed to get products"
+		http2.SendJSONResponse(w, res, http.StatusInternalServerError)
 		return
 	}
 
-	res := model.ProductsResponse{Products: products}
-	if err = json.NewEncoder(w).Encode(res); err != nil {
-		log.Println("failed to encode response", err)
-		http.Error(w, "", http.StatusInternalServerError)
-	}
+	res.Products = products
+	http2.SendJSONResponse(w, res, http.StatusOK)
 }
 
 func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +50,8 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	defer ctx.Done()
 
 	var req model.PurchaseRequest
+	var res model.PurchaseResponse
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("invalid request body", err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -56,7 +60,9 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
-			http.Error(w, fmt.Sprintf("item quantity is negative for SKU: %s", item.SKU), http.StatusBadRequest)
+			res.Error = fmt.Sprintf("item quantity is negative for SKU: %s", item.SKU)
+			http2.SendJSONResponse(w, res, http.StatusBadRequest)
+
 			return
 		}
 	}
@@ -64,18 +70,22 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	totalPrice, updatedProducts, err := s.productRepository.UpdateProductInventories(ctx, req.Items)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "one or more items unavailable", http.StatusConflict)
+			res.Error = "one or more items unavailable"
+			http2.SendJSONResponse(w, res, http.StatusConflict)
+
 			return
 		}
 
 		log.Println("failed to update product inventories", err)
-		http.Error(w, "", http.StatusInternalServerError)
+
+		res.Error = "purchase failed"
+		http2.SendJSONResponse(w, res, http.StatusInternalServerError)
+
 		return
 	}
 
-	res := model.PurchaseResponse{TotalPrice: totalPrice, UpdatedProducts: updatedProducts}
-	if err = json.NewEncoder(w).Encode(res); err != nil {
-		log.Println("failed to encode response", err)
-		http.Error(w, "", http.StatusInternalServerError)
-	}
+	res.TotalPrice = totalPrice
+	res.UpdatedProducts = updatedProducts
+
+	http2.SendJSONResponse(w, res, http.StatusOK)
 }
