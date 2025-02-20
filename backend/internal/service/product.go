@@ -14,8 +14,7 @@ import (
 
 type ProductRepository interface {
 	GetProducts(ctx context.Context) ([]*model.Product, error)
-	GetProductBySKU(ctx context.Context, sku string) (*model.Product, error)
-	UpdateProductInventories(ctx context.Context, items []model.PurchaseItem) ([]*model.Product, error)
+	UpdateProductInventories(ctx context.Context, items []model.PurchaseItem) (float64, []*model.Product, error)
 }
 
 type ProductService struct {
@@ -55,36 +54,20 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	totalPrice := 0.0
-
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
 			http.Error(w, fmt.Sprintf("item quantity is negative for SKU: %w", item.SKU), http.StatusBadRequest)
 			return
 		}
-
-		product, err := s.productRepository.GetProductBySKU(ctx, item.SKU)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				http.Error(w, fmt.Sprintf("no existing product with SKU: %s", item.SKU), http.StatusBadRequest)
-				return
-			}
-
-			log.Println("failed to get product by SKU", err)
-			http.Error(w, "", http.StatusInternalServerError)
-			return
-		}
-
-		if product.Inventory < item.Quantity {
-			http.Error(w, fmt.Sprintf("not enough inventory for SKU: %s", item.SKU), http.StatusConflict)
-			return
-		}
-
-		totalPrice += product.Price * float64(item.Quantity)
 	}
 
-	updatedProducts, err := s.productRepository.UpdateProductInventories(ctx, req.Items)
+	totalPrice, updatedProducts, err := s.productRepository.UpdateProductInventories(ctx, req.Items)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "non-existent product or insufficient inventory", http.StatusBadRequest)
+			return
+		}
+
 		log.Println("failed to update product inventories", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
