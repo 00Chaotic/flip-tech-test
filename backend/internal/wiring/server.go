@@ -2,8 +2,14 @@ package wiring
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/00Chaotic/flip-tech-test/backend/internal/config"
 	"github.com/00Chaotic/flip-tech-test/backend/internal/postgres"
@@ -37,5 +43,35 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 
 	handler := c.Handler(router)
 
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: handler,
+	}
+
+	go func() {
+		fmt.Println("Serving HTTP server")
+
+		if err = srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
+			log.Fatalf("server listener error: %s\n", err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case <-ctx.Done():
+		log.Println("Context cancelled, shutting down server...")
+	case <-stop:
+		log.Println("Interrupt signal received, shutting down server...")
+	}
+
+	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err = srv.Shutdown(ctxShutDown); err != nil {
+		log.Fatalf("server shutdown failed: %s\n", err)
+	}
+
+	log.Println("Server has been shut down")
 }
