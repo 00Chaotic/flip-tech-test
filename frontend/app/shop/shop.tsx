@@ -69,7 +69,11 @@ export function Shop() {
         alert(`You paid $${response.data.total_price}!`)
       })
       .catch(error => {
-        setError(error);
+        if (error.response?.data) {
+          setError(new Error(error.response.data.error));
+        } else {
+          setError(error);
+        }
       });
   };
 
