@@ -67,6 +67,13 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if len(req.Items) == 0 {
+		res.Error = "list of items cannot be empty"
+		http2.SendJSONResponse(w, res, http.StatusBadRequest)
+
+		return
+	}
+
 	for _, item := range req.Items {
 		if item.Quantity < 0 {
 			res.Error = fmt.Sprintf("item quantity is negative for SKU: %s", item.SKU)
