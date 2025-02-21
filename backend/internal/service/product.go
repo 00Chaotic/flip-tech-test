@@ -27,8 +27,8 @@ func NewProductService(productRepository ProductRepository) ProductService {
 }
 
 func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	defer ctx.Done()
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
 
 	var res model.ProductsResponse
 
@@ -46,8 +46,8 @@ func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	defer ctx.Done()
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
 
 	var req model.PurchaseRequest
 	var res model.PurchaseResponse

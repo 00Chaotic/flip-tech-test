@@ -44,7 +44,7 @@ func TestGetProducts(t *testing.T) {
 	}{
 		"error - database error": {
 			Fields: fields{func(r *MockProductRepository) {
-				r.On("GetProducts", mock.AnythingOfType("context.backgroundCtx")).Return(([]*model.Product)(nil), errors.New("database error"))
+				r.On("GetProducts", mock.AnythingOfType("*context.cancelCtx")).Return(([]*model.Product)(nil), errors.New("database error"))
 			}},
 			Want: want{
 				Error:  "failed to get products",
@@ -53,7 +53,7 @@ func TestGetProducts(t *testing.T) {
 		},
 		"success": {
 			Fields: fields{func(r *MockProductRepository) {
-				r.On("GetProducts", mock.AnythingOfType("context.backgroundCtx")).Return(products, nil)
+				r.On("GetProducts", mock.AnythingOfType("*context.cancelCtx")).Return(products, nil)
 			}},
 			Want: want{
 				Products: products,
