@@ -21,10 +21,12 @@ func withTransaction(ctx context.Context, dbx *sqlx.DB, fn func(*sqlx.Tx) error)
 			panic(p)
 		} else if err != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				log.Printf("failed to rollback transaction: %v", rollbackErr)
+				log.Println("failed to rollback transaction", rollbackErr)
 			}
 		} else {
-			err = tx.Commit()
+			if commitErr := tx.Commit(); err != nil {
+				log.Println("failed to commit transaction", commitErr)
+			}
 		}
 	}()
 
