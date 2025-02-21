@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// ProductDAO represents a model.Product database access object.
 type ProductDAO struct {
 	dbx *sqlx.DB
 }
@@ -30,8 +31,8 @@ func (d *ProductDAO) GetProducts(ctx context.Context) ([]*model.Product, error) 
 	return products, nil
 }
 
-// UpdateProductInventories updates Product inventory quantities by adding the difference parameter.
-// A negative difference will subtract from the Product inventory.
+// UpdateProductInventories updates model.Product inventory quantities by subtracting the provided quantity
+// of each product. A negative quantity will add to the product inventory.
 func (d *ProductDAO) UpdateProductInventories(ctx context.Context, items []model.PurchaseItem) (float64, []*model.Product, error) {
 	var products []*model.Product
 	totalPrice := float64(0)

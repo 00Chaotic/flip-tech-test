@@ -13,11 +13,13 @@ import (
 	"github.com/00Chaotic/flip-tech-test/backend/internal/model"
 )
 
+// ProductRepository represents a model.Product database access object.
 type ProductRepository interface {
 	GetProducts(ctx context.Context) ([]*model.Product, error)
 	UpdateProductInventories(ctx context.Context, items []model.PurchaseItem) (float64, []*model.Product, error)
 }
 
+// ProductService represents a service that handles product requests.
 type ProductService struct {
 	productRepository ProductRepository
 }
@@ -26,6 +28,10 @@ func NewProductService(productRepository ProductRepository) ProductService {
 	return ProductService{productRepository: productRepository}
 }
 
+// GetProducts is an http.HandlerFunc which retrieves a list of all products. The
+// response contains a model.ProductsResponse.
+// Realistically this would be paginated, but I've just kept it simple for the scope
+// of this exercise.
 func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
@@ -45,6 +51,9 @@ func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 	http2.SendJSONResponse(w, res, http.StatusOK)
 }
 
+// PurchaseProducts is an http.HandlerFunc which facilitates making a purchase.
+// It expects a model.PurchaseRequest containing a list of SKUs and quantities,
+// and returns a model.PurchaseResponse.
 func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()

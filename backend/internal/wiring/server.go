@@ -20,6 +20,7 @@ import (
 	"github.com/rs/cors"
 )
 
+// StartServer wires together the server components and serves the HTTP REST API.
 func StartServer(ctx context.Context, cfg *config.Config) {
 	dbx, err := sqlx.ConnectContext(ctx, "postgres", cfg.DatabaseUrl)
 	if err != nil {
