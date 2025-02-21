@@ -25,6 +25,7 @@ func StartServer(ctx context.Context, cfg *config.Config) {
 	if err != nil {
 		log.Fatal("failed connecting to database", err)
 	}
+	defer dbx.Close()
 
 	productDAO := postgres.NewProductDAO(dbx)
 
