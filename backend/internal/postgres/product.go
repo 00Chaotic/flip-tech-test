@@ -20,7 +20,7 @@ func NewProductDAO(dbx *sqlx.DB) *ProductDAO {
 func (d *ProductDAO) GetProducts(ctx context.Context) ([]*model.Product, error) {
 	var products []*model.Product
 
-	query := `SELECT * FROM Product`
+	query := `SELECT * FROM Product ORDER BY SKU ASC`
 
 	err := d.dbx.SelectContext(ctx, &products, query)
 	if err != nil {
