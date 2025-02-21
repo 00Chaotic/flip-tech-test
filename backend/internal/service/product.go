@@ -79,8 +79,8 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 	}
 
 	for _, item := range req.Items {
-		if item.Quantity < 0 {
-			res.Error = fmt.Sprintf("item quantity is negative for SKU: %s", item.SKU)
+		if item.Quantity <= 0 {
+			res.Error = fmt.Sprintf("invalid item quantity for SKU: %s", item.SKU)
 			http2.SendJSONResponse(w, res, http.StatusBadRequest)
 
 			return
