@@ -44,6 +44,7 @@ func (s *ProductService) GetProducts(w http.ResponseWriter, r *http.Request) {
 
 		res.Error = "failed to get products"
 		http2.SendJSONResponse(w, res, http.StatusInternalServerError)
+
 		return
 	}
 
@@ -63,7 +64,10 @@ func (s *ProductService) PurchaseProducts(w http.ResponseWriter, r *http.Request
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("invalid request body", err)
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+
+		res.Error = "invalid request body"
+		http2.SendJSONResponse(w, res, http.StatusBadRequest)
+
 		return
 	}
 
